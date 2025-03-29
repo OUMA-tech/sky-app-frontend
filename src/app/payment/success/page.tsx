@@ -1,4 +1,5 @@
 "use client"; // 必须位于第一行
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
@@ -38,7 +39,10 @@ const Success = () => {
       const token = localStorage.getItem("token");
       try {
         // 从 URL 获取支付会话 ID（客户端方式）
-        const sessionId = new URLSearchParams(window.location.search).get('session_id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        const orderNumber = urlParams.get('order_number');
+        const payMethod = urlParams.get('pay_method')
         console.log(sessionId)
         if (!sessionId) {
           router.push('/payment-error?reason=no_session');
@@ -46,8 +50,13 @@ const Success = () => {
         }
 
         // 调用 API 验证支付
-        const response = await fetch(
-          `/api/user/payment/paymentDetails?session_id=${sessionId}`,
+        const response = await axios.put(
+          `/api/user/order/payment`,
+          {
+            orderNumber: orderNumber,
+            payMethod: payMethod,
+            sessionId: sessionId
+          },
           {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -55,8 +64,8 @@ const Success = () => {
             },
           }
         );
-        const data = await response.json();
-        console.log(data.data.amount);
+        
+        const {data} = response;
         if (data.code) {
           setOrder(data.data);
         } else {

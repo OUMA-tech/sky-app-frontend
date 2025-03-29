@@ -17,11 +17,18 @@ const PaymentPage = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
-        'http://localhost:8080/user/payment/create-checkout-session',
+        '/api/user/order/submit',
         {
-          orderNumber: "1741605018485",
-          payMethod: 1,
-        },
+          "addressBookId": 3,
+          "amount": 12,
+          "deliveryStatus": 0,
+          "packAmount": 3,
+          "payMethod": 1,
+          "remark": "string",
+          "tablewareNumber": 0,
+          "tablewareStatus": 0,
+          "deliverFee": 10
+      },
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -30,8 +37,8 @@ const PaymentPage = () => {
         }
       );
       
-      const { sessionId } = response.data;
-      console.log(sessionId);
+      const { sessionId } = response.data.data;
+      console.log(response.data.data);
       // 检查 stripe 是否已加载
       const stripe = await stripePromise;
       if (!stripe) {
